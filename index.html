@@ -29,7 +29,12 @@ function minutesUntilOpen() {
 }
 
 var interval = window.setInterval(function() {
-    countdown.innerHTML = parseInt(minutesUntilOpen(), 10) + ' minutes';
+    var minutes =  parseInt(minutesUntilOpen(), 10);
+    if (minutes < 0) {
+        countdown.innerHTML = '🎉';
+    } else {
+        countdown.innerHTML = minutes + ' minutes';
+    }
 }, 1000);
 </script>
 
