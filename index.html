@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+<style>
+body {
+    font-size: 200px;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="pool">🎱</div>
+<div id="countdown"></div>
+
+<script>
+var countdown = document.getElementById('countdown');
+var index = 0;
+
+function minutesUntilOpen() {
+    var midnight = new Date();
+    midnight.setHours(16);
+    midnight.setMinutes(30);
+    midnight.setSeconds(0);
+    midnight.setMilliseconds( 0 );
+    return ( midnight.getTime() - new Date().getTime() ) / 1000 / 60;
+}
+
+var interval = window.setInterval(function() {
+    countdown.innerHTML = parseInt(minutesUntilOpen(), 10) + ' minutes';
+}, 1000);
+</script>
+
+</body>
+</html>
