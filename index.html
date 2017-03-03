@@ -5,7 +5,7 @@
     <title></title>
 <style>
 body {
-    font-size: 200px;
+    font-size: 7vw;
     text-align: center;
 }
 </style>
@@ -15,27 +15,34 @@ body {
 <div class="pool">🎱</div>
 <div id="countdown"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
 <script>
 var countdown = document.getElementById('countdown');
 var index = 0;
 
-function minutesUntilOpen() {
-    var midnight = new Date();
-    midnight.setHours(16);
-    midnight.setMinutes(30);
-    midnight.setSeconds(0);
-    midnight.setMilliseconds( 0 );
-    return ( midnight.getTime() - new Date().getTime() ) / 1000 / 60;
-}
+var now = new Date()
+var openHour = [now.getFullYear(), now.getMonth(), now.getDate(), 16, 45];
+var closeHour = [now.getFullYear(), now.getMonth(), now.getDate(), 23, 59];
 
-var interval = window.setInterval(function() {
-    var minutes =  parseInt(minutesUntilOpen(), 10);
-    if (minutes < 0) {
+var open = moment(openHour);
+var close = moment(closeHour);
+
+var diffTime = open.valueOf() - now;
+var duration = moment.duration(diffTime * 1000, 'milliseconds');
+var interval = 1000;
+
+window.setInterval(function(){
+    duration = moment.duration(duration - interval, 'milliseconds');
+    countdown.innerHTML = (duration.hours() + ":" + duration.minutes() + ":" + duration.seconds());
+}, interval);
+
+function until() {
+    if (open > 0) {
         countdown.innerHTML = '🎉';
     } else {
-        countdown.innerHTML = minutes + ' minutes';
+        countdown.innerHTML = -moment().diff(openHour, 'hours') + ':' + -moment().diff(openHour, 'minutes') + ':' + -moment().diff(openHour, 'seconds') % 60;
     }
-}, 1000);
+}
 </script>
 
 </body>
