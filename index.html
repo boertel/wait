@@ -12,25 +12,64 @@ body {
 </head>
 <body>
 
-<div class="pool">🎱</div>
+<div id="emoji">🎱</div>
 <div id="countdown"></div>
 
 <script>
 var countdown = document.getElementById('countdown');
-var index = 0;
+var emoji = document.getElementById('emoji');
 
-function minutesUntilOpen() {
-    var midnight = new Date();
-    midnight.setHours(16);
-    midnight.setMinutes(30);
-    midnight.setSeconds(0);
-    midnight.setMilliseconds( 0 );
-    return ( midnight.getTime() - new Date().getTime() ) / 1000 / 60;
+var attrs = {
+    'months': 'getMonths',
+    'days': 'getDays',
+    'hours': 'getHours',
+    'minutes': 'getMinutes',
+    'seconds': 'getSeconds',
 }
 
-var interval = window.setInterval(function() {
-    countdown.innerHTML = parseInt(minutesUntilOpen(), 10) + ' minutes';
-}, 1000);
+
+var search = window.location.search;
+var query = {};
+search.substring(1, search.length).split('&').forEach(function(pair) {
+    pair = pair.split('=');
+    query[pair[0]] = pair[1];
+})
+
+var data = {
+    emoji: query.e || '🎱',
+    time: {
+        hours: 16,
+        minutes: 30,
+    },
+};
+
+for (var key in attrs) {
+    if (query[key] !== undefined) {
+        data.time[key] = parseInt(query[key], 10);
+    }
+}
+
+var now = new Date();
+var until = {
+    hours: data.time.hours - now.getHours(),
+    minutes: data.time.minutes - now.getMinutes(),
+};
+for (var key in attrs) {
+    var method = attrs[key];
+    if (data.time[key]) {
+        until[key] = data.time[key] - now[method]();
+    }
+}
+
+emoji.innerHTML = data.emoji;
+
+var times = ['months', 'days', 'hours', 'minutes', 'seconds'].filter(function(unit) {
+    return until[unit] !== undefined && until[unit] > 0;
+}).map(function(unit) {
+    return until[unit] + ' ' + unit;
+});
+
+countdown.innerHTML = times.join(' ');
 </script>
 
 </body>
