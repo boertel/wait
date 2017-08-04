@@ -5,7 +5,7 @@
     <title></title>
 <style>
 body {
-    font-size: 200px;
+    font-size: 160px;
     text-align: center;
 }
 </style>
@@ -20,8 +20,9 @@ var countdown = document.getElementById('countdown');
 var emoji = document.getElementById('emoji');
 
 var attrs = {
-    'months': 'getMonths',
-    'days': 'getDays',
+    'year': 'getFullYear',
+    'months': 'getMonth',
+    'days': 'getDate',
     'hours': 'getHours',
     'minutes': 'getMinutes',
     'seconds': 'getSeconds',
@@ -39,37 +40,62 @@ var data = {
     emoji: decodeURIComponent(query.e) || '🎱',
     time: {
         hours: 16,
-        minutes: 30,
+        minutes: 35,
+        seconds: 59,
     },
 };
 
-for (var key in attrs) {
-    if (query[key] !== undefined) {
-        data.time[key] = parseInt(query[key], 10);
-    }
-}
-
-var now = new Date();
-var until = {
-    hours: data.time.hours - now.getHours(),
-    minutes: data.time.minutes - now.getMinutes(),
-};
-for (var key in attrs) {
-    var method = attrs[key];
-    if (data.time[key]) {
-        until[key] = data.time[key] - now[method]();
-    }
-}
-
 emoji.innerHTML = data.emoji;
+document.title = data.emoji;
 
-var times = ['months', 'days', 'hours', 'minutes', 'seconds'].filter(function(unit) {
-    return until[unit] !== undefined && until[unit] > 0;
-}).map(function(unit) {
-    return until[unit] + ' ' + unit;
-});
+if (query.time) {
+    var time = query.time.split(':');
+    data.time.hours = time[0];
+    data.time.minutes = time[1];
+    if (time.length > 2) {
+        data.time.seconds = times[2];
+    }
+}
 
-countdown.innerHTML = times.join(' ');
+if (query.date) {
+    var date = query.date.split('-').reverse();
+    data.time.days = date[0];
+    date.length > 1 && (data.time.months = date[1])
+    date.length > 2 && (data.time.years = date[2])
+}
+
+function timeUntil() {
+    var now = new Date();
+    var until = {
+    };
+    for (var key in attrs) {
+        var method = attrs[key];
+        if (data.time[key]) {
+            until[key] = data.time[key] - now[method]();
+        }
+    }
+    return until;
+}
+
+function format(until) {
+    var times = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'].filter(function(unit) {
+        return until[unit] !== undefined && until[unit] > 0;
+    }).map(function(unit) {
+        return until[unit] + ' ' + unit;
+    });
+    return times;
+}
+
+function append() {
+    var until = timeUntil();
+    var percentage = 1 - (0.06 * Object.keys(until).length)
+    countdown.style.fontSize = (200 * percentage) + 'px';
+    countdown.innerHTML = format(until).join(' ');
+}
+
+window.setInterval(append, 1000);
+
+append();
 </script>
 
 </body>
