@@ -5,44 +5,71 @@
     <title></title>
 <style>
 body {
-    font-size: 7vw;
+    font-size: 200px;
     text-align: center;
 }
 </style>
 </head>
 <body>
 
-<div class="pool">🎱</div>
+<div id="emoji">🎱</div>
 <div id="countdown"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
 <script>
 var countdown = document.getElementById('countdown');
-var index = 0;
+var emoji = document.getElementById('emoji');
 
-var now = new Date()
-var openHour = [now.getFullYear(), now.getMonth(), now.getDate(), 16, 45];
-var closeHour = [now.getFullYear(), now.getMonth(), now.getDate(), 23, 59];
+var attrs = {
+    'months': 'getMonths',
+    'days': 'getDays',
+    'hours': 'getHours',
+    'minutes': 'getMinutes',
+    'seconds': 'getSeconds',
+}
 
-var open = moment(openHour);
-var close = moment(closeHour);
 
-var diffTime = open.valueOf() - now;
-var duration = moment.duration(diffTime * 1000, 'milliseconds');
-var interval = 1000;
+var search = window.location.search;
+var query = {};
+search.substring(1, search.length).split('&').forEach(function(pair) {
+    pair = pair.split('=');
+    query[pair[0]] = pair[1];
+})
 
-window.setInterval(function(){
-    duration = moment.duration(duration - interval, 'milliseconds');
-    countdown.innerHTML = (duration.hours() + ":" + duration.minutes() + ":" + duration.seconds());
-}, interval);
+var data = {
+    emoji: query.e || '🎱',
+    time: {
+        hours: 16,
+        minutes: 30,
+    },
+};
 
-function until() {
-    if (open > 0) {
-        countdown.innerHTML = '🎉';
-    } else {
-        countdown.innerHTML = -moment().diff(openHour, 'hours') + ':' + -moment().diff(openHour, 'minutes') + ':' + -moment().diff(openHour, 'seconds') % 60;
+for (var key in attrs) {
+    if (query[key] !== undefined) {
+        data.time[key] = parseInt(query[key], 10);
     }
 }
+
+var now = new Date();
+var until = {
+    hours: data.time.hours - now.getHours(),
+    minutes: data.time.minutes - now.getMinutes(),
+};
+for (var key in attrs) {
+    var method = attrs[key];
+    if (data.time[key]) {
+        until[key] = data.time[key] - now[method]();
+    }
+}
+
+emoji.innerHTML = data.emoji;
+
+var times = ['months', 'days', 'hours', 'minutes', 'seconds'].filter(function(unit) {
+    return until[unit] !== undefined && until[unit] > 0;
+}).map(function(unit) {
+    return until[unit] + ' ' + unit;
+});
+
+countdown.innerHTML = times.join(' ');
 </script>
 
 </body>
