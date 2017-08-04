@@ -36,7 +36,7 @@ search.substring(1, search.length).split('&').forEach(function(pair) {
 })
 
 var data = {
-    emoji: query.e || '🎱',
+    emoji: decodeURIComponent(query.e) || '🎱',
     time: {
         hours: 16,
         minutes: 30,
