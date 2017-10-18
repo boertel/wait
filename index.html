@@ -41,7 +41,7 @@ var data = {
     time: {
         hours: 16,
         minutes: 35,
-        seconds: 59,
+        seconds: 00,
     },
 };
 
@@ -50,47 +50,68 @@ document.title = data.emoji;
 
 if (query.time) {
     var time = query.time.split(':');
-    data.time.hours = time[0];
-    data.time.minutes = time[1];
+    data.time.hours = parseInt(time[0], 10);
+    data.time.minutes = parseInt(time[1], 10);
     if (time.length > 2) {
-        data.time.seconds = times[2];
+        data.time.seconds = parseInt(times[2], 10);
     }
 }
 
 if (query.date) {
     var date = query.date.split('-').reverse();
-    data.time.days = date[0];
-    date.length > 1 && (data.time.months = date[1])
-    date.length > 2 && (data.time.years = date[2])
+    data.time.date = date[0];
+    date.length > 1 && (data.time.month = parseInt(date[1], 10) - 1)
+    date.length > 2 && (data.time.fullYear = parseInt(date[2]))
 }
 
-function timeUntil() {
+var next = new Date();
+for (var key in data.time) {
+    var method = 'set' + key[0].toUpperCase() + key.substring(1, key.length);
+    next[method] && next[method](data.time[key]);
+}
+
+
+function format(next) {
+    var until = {};
     var now = new Date();
-    var until = {
-    };
-    for (var key in attrs) {
-        var method = attrs[key];
-        if (data.time[key]) {
-            until[key] = data.time[key] - now[method]();
-        }
-    }
-    return until;
-}
+    // get total seconds between the times
+    var delta = Math.abs(next.getTime() - now.getTime()) / 1000;
 
-function format(until) {
-    var times = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'].filter(function(unit) {
-        return until[unit] !== undefined && until[unit] > 0;
-    }).map(function(unit) {
-        return until[unit] + ' ' + unit;
-    });
-    return times;
+    // calculate (and subtract) whole days
+    var days = Math.floor(delta / 86400);
+    delta -= days * 86400;
+    until.day = days;
+
+    // calculate (and subtract) whole hours
+    var hours = Math.floor(delta / 3600) % 24;
+    delta -= hours * 3600;
+    until.hour = hours;
+
+    // calculate (and subtract) whole minutes
+    var minutes = Math.floor(delta / 60) % 60;
+    delta -= minutes * 60;
+    until.minute = minutes;
+
+    // what's left is seconds
+    var seconds = parseInt(delta % 60, 10);
+    until.second = seconds;
+
+    var output = ['day', 'hour', 'minute', 'second'].map(function (key) {
+        var value = until[key];
+        if (until[key]) {
+            return value + ' ' + key + (value === 1 ? '' : 's');
+        }
+        return undefined;
+    }).filter(function (value) { return value !== undefined; });
+
+    return output.join(', ');
 }
 
 function append() {
-    var until = timeUntil();
-    var percentage = 1 - (0.06 * Object.keys(until).length)
+    var str = format(next);
+    var percentage = 1 - (0.06 * Object.keys(str).length)
     countdown.style.fontSize = (200 * percentage) + 'px';
-    countdown.innerHTML = format(until).join(' ');
+    countdown.innerHTML = str;
 }
 
 window.setInterval(append, 1000);
