@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title></title>
 <style>
 body {
@@ -12,21 +12,12 @@ body {
 </head>
 <body>
 
-<div id="emoji">🎱</div>
+<div id="emoji"></div>
 <div id="countdown"></div>
 
 <script>
 var countdown = document.getElementById('countdown');
 var emoji = document.getElementById('emoji');
-
-var attrs = {
-    'year': 'getFullYear',
-    'months': 'getMonth',
-    'days': 'getDate',
-    'hours': 'getHours',
-    'minutes': 'getMinutes',
-    'seconds': 'getSeconds',
-}
 
 
 var search = window.location.search;
@@ -37,10 +28,10 @@ search.substring(1, search.length).split('&').forEach(function(pair) {
 })
 
 var data = {
-    emoji: decodeURIComponent(query.e) || '🎱',
+    emoji: decodeURIComponent(query.e) || '?',
     time: {
-        hours: 16,
-        minutes: 35,
+        hours: 00,
+        minutes: 00,
         seconds: 00,
     },
 };
@@ -71,11 +62,10 @@ for (var key in data.time) {
 }
 
 
-function format(next) {
+function format(diff) {
     var until = {};
-    var now = new Date();
     // get total seconds between the times
-    var delta = Math.abs(next.getTime() - now.getTime()) / 1000;
+    var delta = Math.abs(diff) / 1000;
 
     // calculate (and subtract) whole days
     var days = Math.floor(delta / 86400);
@@ -98,20 +88,21 @@ function format(next) {
 
     var output = ['day', 'hour', 'minute', 'second'].map(function (key) {
         var value = until[key];
-        if (until[key]) {
+        if (value !== undefined) {
             return value + ' ' + key + (value === 1 ? '' : 's');
         }
         return undefined;
     }).filter(function (value) { return value !== undefined; });
 
-    return output.join(', ');
+    return output;
 }
 
 function append() {
-    var str = format(next);
-    var percentage = 1 - (0.06 * Object.keys(str).length)
-    countdown.style.fontSize = (200 * percentage) + 'px';
-    countdown.innerHTML = str;
+    var now = new Date();
+    var diff = next.getTime() - now.getTime();
+    var str = format(diff);
+    countdown.style.fontSize = '5vw';
+    countdown.innerHTML = (diff < 0 ? '-' : '') + str.splice(0, str.length -1).join(', ') + ' and ' + str[str.length - 1];
 }
 
 window.setInterval(append, 1000);
