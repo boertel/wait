@@ -88,7 +88,7 @@ function format(diff) {
 
     var output = ['day', 'hour', 'minute', 'second'].map(function (key) {
         var value = until[key];
-        if (value !== undefined) {
+        if (value || (key === 'second')) {
             return value + ' ' + key + (value === 1 ? '' : 's');
         }
         return undefined;
